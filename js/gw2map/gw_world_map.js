@@ -19,7 +19,7 @@ jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data
 		// Load first available continent
     continentList = data;
 		renderContinent(continentList[0]);
-		function populateContinent(continentList[0])
+		populateContinent(continentList[0]);
 });
 
 // Initialize Leaflet API and create a map based on the div id 'map'
@@ -36,7 +36,6 @@ function initializeMap()
 // Displays a given continent with leaflet
 function renderContinent(continent)
 {
-
 	// set leaflet map scroll bounds
 	var dimWidth = continent.continent_dims[0];
 	var dimHeight = continent.continent_dims[1];
