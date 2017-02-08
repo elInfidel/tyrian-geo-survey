@@ -6,8 +6,6 @@
 
 // Leaflet library map object
 var map;
-// Dimensions for current map. Used with leaflet for setting bounds.
-var southWestBound, northEastBound;
 // List of available continents
 var continentList;
 // Map data for the currently viewed continent
@@ -20,42 +18,43 @@ jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data
 
 		// Load first available continent
     continentList = data;
-		displayContinent(continentList[0]);
+		renderContinent(continentList[0]);
+		function populateContinent(continentList[0])
 });
 
 // Initialize Leaflet API and create a map based on the div id 'map'
 function initializeMap()
 {
 	map = L.map("map", {
-	    minZoom: 3,
-	    maxZoom: 7,
+		minZoom: 2,
+		maxZoom: 7,
+		reuseTiles: true,
+    crs: L.CRS.Simple
 	});
 }
 
 // Displays a given continent with leaflet
-function displayContinent(continent)
+function renderContinent(continent)
 {
+
 	// set leaflet map scroll bounds
-	setBounds(continent.continent_dims[0], continent.continent_dims[1]);
+	var dimWidth = continent.continent_dims[0];
+	var dimHeight = continent.continent_dims[1];
+	map.setMaxBounds(L.latLngBounds(unproject([0, 0]), unproject([dimWidth, dimHeight])));
 
 	// Load tiles
 	L.tileLayer("https://tiles{s}.guildwars2.com/" + continent.id + "/1/{z}/{x}/{y}.jpg",
 	{
-		minZoom: continent.min_zoom,
-		maxZoom: continent.max_zoom,
 		continuousWorld: true,
-		subdomains: '1234'
+		subdomains: '1234' // current tile service subdomains
 	}).addTo(map);
 
 	map.fitWorld();
 }
 
-function setBounds(x, y)
+function populateContinent(continent)
 {
-	southWestBound = unproject([0, y]);
-	northEastBound = unproject([x, 0]);
 
-	map.setMaxBounds(new L.LatLngBounds(southWestBound, northEastBound));
 }
 
 // Unprojects the supplied coordinates onto the map
