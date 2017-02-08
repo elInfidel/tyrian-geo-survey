@@ -1,21 +1,25 @@
 ////////////////////
 // Tyrian Geographical Survey
 //
-// Based on a rudimentary example by Cliff Spradlin
-// http://jsfiddle.net/cliff/CRRGC/
+// @Author = Liam
 ////////////////////
 
+// Leaflet library map object
 var map;
+// Dimensions for current map. Used with leaflet for setting bounds.
 var southWest, northEast;
+// List of available continents
+var continentData;
+// Map data for the currently viewed continent
+var mapData;
 
-var ContinentEnum =
-{
-	TYRIA: 1,
-	MISTS: 2
-};
+jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data) {
+    continentData = data;
+});
 
 initializeMap();
-displayContinent(ContinentEnum.TYRIA);
+console.log(continentData);
+//displayContinent(continentData[0].name);
 
 // Initializes Leaflet API and creates a map based on the div id 'map'
 function initializeMap()
@@ -36,13 +40,17 @@ function initializeMap()
 // Should pass ContinentEnum type into this.
 function displayContinent(continent)
 {
-	switch(continent)
+
+	prompt(continent);
+
+	// Old code
+	/*switch(continent)
 	{
 		case ContinentEnum.TYRIA:
 
 		L.tileLayer("https://tiles{s}.guildwars2.com/1/1/{z}/{x}/{y}.jpg",
 		{
-			minZoom: 3,
+			minZoom: 1,
 		  maxZoom: 7,
 		  continuousWorld: true,
 			subdomains: '1234'
@@ -57,7 +65,7 @@ function displayContinent(continent)
 		//TODO
 		break;
 
-	}
+	}*/
 }
 
 // Unprojects the supplied coordinates onto the map
