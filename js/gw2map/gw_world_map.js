@@ -9,66 +9,51 @@ var map;
 // Dimensions for current map. Used with leaflet for setting bounds.
 var southWestBound, northEastBound;
 // List of available continents
-var continentData;
+var continentList;
 // Map data for the currently viewed continent
 var mapData;
+
+initializeMap();
 
 // Load continent JSON async.
 jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data) {
 
 		// Load first available continent
-    continentData = data;
-		displayContinent(continentData[0].name);
+    continentList = data;
+		displayContinent(continentList[0]);
 });
 
-initializeMap();
-
-// Initializes Leaflet API and creates a map based on the div id 'map'
+// Initialize Leaflet API and create a map based on the div id 'map'
 function initializeMap()
 {
 	map = L.map("map", {
 	    minZoom: 3,
 	    maxZoom: 7,
-	    crs: L.CRS.Simple
-	}).setView([0, 0], 0);
-
-	setBounds(32768);
+	});
 }
 
-// Displays a continent based on the arguement
-// Should pass ContinentEnum type into this.
+// Displays a given continent with leaflet
 function displayContinent(continent)
 {
-	
-	// Old code
-	/*switch(continent)
+	// set leaflet map scroll bounds
+	setBounds(continent.continent_dims[0], continent.continent_dims[1]);
+
+	// Load tiles
+	L.tileLayer("https://tiles{s}.guildwars2.com/" + continent.id + "/1/{z}/{x}/{y}.jpg",
 	{
-		case ContinentEnum.TYRIA:
+		minZoom: continent.min_zoom,
+		maxZoom: continent.max_zoom,
+		continuousWorld: true,
+		subdomains: '1234'
+	}).addTo(map);
 
-		L.tileLayer("https://tiles{s}.guildwars2.com/1/1/{z}/{x}/{y}.jpg",
-		{
-			minZoom: 1,
-		  maxZoom: 7,
-		  continuousWorld: true,
-			subdomains: '1234'
-		}).addTo(map);
-
-		$.getJSON("https://api.guildwars2.com/v2/continents/" + continent, function (continent)
-		{
-		});
-		break;
-
-		case ContinentEnum.MISTS:
-		//TODO
-		break;
-
-	}*/
+	map.fitWorld();
 }
 
 function setBounds(x, y)
 {
-	southWestBound = unproject([0, x]);
-	northEastBound = unproject([y, 0]);
+	southWestBound = unproject([0, y]);
+	northEastBound = unproject([x, 0]);
 
 	map.setMaxBounds(new L.LatLngBounds(southWestBound, northEastBound));
 }
