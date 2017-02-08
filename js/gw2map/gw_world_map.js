@@ -7,19 +7,21 @@
 // Leaflet library map object
 var map;
 // Dimensions for current map. Used with leaflet for setting bounds.
-var southWest, northEast;
+var southWestBound, northEastBound;
 // List of available continents
 var continentData;
 // Map data for the currently viewed continent
 var mapData;
 
+// Load continent JSON async.
 jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data) {
+
+		// Load first available continent
     continentData = data;
+		displayContinent(continentData[0].name);
 });
 
 initializeMap();
-console.log(continentData);
-//displayContinent(continentData[0].name);
 
 // Initializes Leaflet API and creates a map based on the div id 'map'
 function initializeMap()
@@ -30,19 +32,14 @@ function initializeMap()
 	    crs: L.CRS.Simple
 	}).setView([0, 0], 0);
 
-	  southWest = unproject([0, 32768]);
-		northEast = unproject([32768, 0]);
-
-	  map.setMaxBounds(new L.LatLngBounds(southWest, northEast));
+	setBounds(32768);
 }
 
 // Displays a continent based on the arguement
 // Should pass ContinentEnum type into this.
 function displayContinent(continent)
 {
-
-	prompt(continent);
-
+	
 	// Old code
 	/*switch(continent)
 	{
@@ -66,6 +63,14 @@ function displayContinent(continent)
 		break;
 
 	}*/
+}
+
+function setBounds(x, y)
+{
+	southWestBound = unproject([0, x]);
+	northEastBound = unproject([y, 0]);
+
+	map.setMaxBounds(new L.LatLngBounds(southWestBound, northEastBound));
 }
 
 // Unprojects the supplied coordinates onto the map
