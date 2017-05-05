@@ -8,19 +8,14 @@
 var map;
 // List of available continents
 var continentList;
-// Map data for the currently viewed continent
+// A dictionary storing continents and the maps they contain
+// Key = Continent ID
+// Value = List of map objects for that continent
 var mapData;
+var mapIds
 
 initializeMap();
-
-// Load continent JSON async.
-jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data) {
-
-		// Load first available continent
-    continentList = data;
-		renderContinent(continentList[0]);
-		populateContinent(continentList[0]);
-});
+downloadWorldData();
 
 // Initialize Leaflet API and create a map based on the div id 'map'
 function initializeMap()
@@ -30,6 +25,40 @@ function initializeMap()
 		maxZoom: 7,
 		reuseTiles: true,
     crs: L.CRS.Simple
+	});
+}
+
+// Downloads informations about the continents and maps in the game world.
+// Stores them in variables for access elsewhere.
+function downloadWorldData()
+{
+	// Load continent JSON async.
+	jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data)
+	{
+			// Load first available continent
+	    continentList = data;
+			renderContinent(continentList[0]);
+	});
+
+	// Load map data async
+	jQuery.getJSON("https://api.guildwars2.com/v1/maps", function(data)
+	{
+			mapData = new Object();
+
+			for (var object in data.maps)
+			{
+				// We need to check if we're dealing with a map or some other undefined junk within the maps object
+				// Typical javascript rubbish.
+    		if (!data.maps.hasOwnProperty(object)) continue;
+    		var m =  data.maps[object];
+
+				if(mapData[m.continent_id] == undefined)
+					mapData[m.continent_id] = []
+
+				mapData[m.continent_id].push(m)
+			}
+
+			populateContinent(continentList[0]);
 	});
 }
 
@@ -51,9 +80,31 @@ function renderContinent(continent)
 	map.fitWorld();
 }
 
+// Populates a continents contained regions
 function populateContinent(continent)
 {
+	mapData[continent.id].forEach(function(m)
+	{
+		topLeft = m.continent_rect[0];
+		bottomRight = m.continent_rect[1];
+		bounds = L.latLngBounds(unproject(topLeft), unproject(bottomRight));
 
+		// Create rectangles to surround each map.
+		// Events for handling interaction with those rectangles.
+		layer = L.rectangle(bounds, {color: "#ffb847", weight: 0.5, opacity: 0.3, fill: false}).addTo(map);
+
+		layer.on('mouseover', function(ev)
+		{
+    	layer.weight = 3.0
+			console.log("entered!");
+		});
+
+		layer.on('mouseout', function(ev)
+		{
+    	layer.opacity = 0.5
+		});
+
+	});
 }
 
 // Unprojects the supplied coordinates onto the map
