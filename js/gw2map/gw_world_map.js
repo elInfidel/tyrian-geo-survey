@@ -85,33 +85,7 @@ function populateContinent(continent)
 {
 	mapData[continent.id].forEach(function(m)
 	{
-		// We don't want to display instances on the continent map.
-		if(m.type == "Public")
-		{
-			topLeft = m.continent_rect[0];
-			bottomRight = m.continent_rect[1];
-			bounds = L.latLngBounds(unproject(topLeft), unproject(bottomRight));
-
-			// Create rectangles to surround each map.
-			// Events for handling interaction with those rectangles.
-			layer = L.rectangle(bounds, {color: "#ffb847", weight: 0.5, opacity: 1.0, fill: false}).addTo(map);
-
-			layer.on('mouseover', function(ev)
-			{
-
-			});
-
-			layer.on('mouseout', function(ev)
-			{
-
-			});
-
-			layer.on('click', function(ev)
-			{
-				map.fitBounds(layer.getBounds());
-				cosnole.log("Clicked!");
-			});
-		}
+		
 	});
 }
 
