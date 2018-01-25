@@ -31,7 +31,7 @@ function initializeMap() {
 // Stores them in variables for access elsewhere.
 function downloadWorldData() {
     // Load continent JSON async.
-    jQuery.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data) {
+    $.getJSON("https://api.guildwars2.com/v2/continents?ids=all", function(data) {
         // Load first available continent
         continentList = data;
         renderContinent(continentList[0]);
