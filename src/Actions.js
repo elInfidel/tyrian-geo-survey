@@ -3,16 +3,17 @@ import IContinent from './Interfaces';
 
 
 export const enum TyriaMapActions {
-    CONTINENTS_LOADED = 'CONTINENTS_LOADED',
+    FETCH_CONTINENTS = 'FETCH_CONTINENTS',
+    CONTINENTS_RECEIVED = ''
 }
 
 export interface IContinentsLoadedAction extends Redux.Action{
     continents: IContinent[];
 }
 
-export function continentsLoaded(continents) : IContinentsLoadedAction {
+export function fetchContinents(continents) : Redux.AnyAction {
     return {
-        type: TyriaMapActions.CONTINENTS_LOADED,
+        type: TyriaMapActions.FETCH_CONTINENTS,
         continents,
     };
 }
