@@ -3,41 +3,49 @@ import { Map, TileLayer } from 'react-leaflet';
 import { TyriaContinentData, TyriaMapData } from '../../../../Interfaces';
 import * as L from 'leaflet';
 
+import './styles.css';
+
 interface TyriaMapProps {
     continents: TyriaContinentData[];
     maps: TyriaMapData[];
 }
 
-export default class TyrianLeafletMap extends React.Component<TyriaMapProps> {
+interface TyriaMapState {
+    map: L.Map | undefined;
+}
 
-    // Trying to figure out how to type the ref assignment to this value
-    // Nothing seems to fit and I can't cast. Will ignore an any declaration for now
-    // to work around
-    // TODO: Fix this!
-    // tslint:disable-next-line
-    private mapAPI: any;
+export default class TyrianLeafletMap extends React.PureComponent<TyriaMapProps, TyriaMapState> {
+
+    constructor(props: TyriaMapProps) {
+        super(props);
+        this.state = {
+            map: undefined
+        };
+    }
+
+    componentDidUpdate(prevProps: TyriaMapProps, prevState: TyriaMapState) {
+        if (!prevState.map && this.state.map) {
+            this.initMap();
+        }
+    }
 
     render() {
-        // Otherwise we build a map based on the given continents ID.
-        const dimWidth = this.props.continents[0].continent_dims[0];
-        const dimHeight = this.props.continents[0].continent_dims[1];
-
-        const minBounds = this.unproject([0, 0]);
-        const maxBounds = this.unproject([dimWidth, dimHeight]);
-        const boundMax = L.latLngBounds(minBounds, maxBounds);
-        this.mapAPI.setMaxBounds(boundMax);
-        
         return (
-            <Map 
+            <Map
                 id="tyria-map"
-                zoom={13} 
-                minZoom={0}
-                maxZoom={7} 
-                reuseTiles={true} 
+                zoom={13}
+                minZoom={this.props.continents[0].min_zoom}
+                maxZoom={this.props.continents[0].min_zoom}
+                reuseTiles={true}
                 crs={L.CRS.Simple}
+                ref={(ref) => {
+                    if (ref && !this.state.map) {
+                        this.setState({ map: ref.leafletElement });
+                    }
+                }}
             >
                 <TileLayer
-                    url={'https://tiles{s}.guildwars2.com/0/1/{z}/{x}/{y}.jpg'}
+                    url={'https://tiles{s}.guildwars2.com/1/1/{z}/{x}/{y}.jpg'}
                     continuousWorld={true}
                     subdomains={'1234'}
                 />
@@ -45,8 +53,27 @@ export default class TyrianLeafletMap extends React.Component<TyriaMapProps> {
         );
     }
 
+    private initMap() {
+        if (this.state.map) {
+
+            // Otherwise we build a map based on the given continents ID.
+            const dimWidth = this.props.continents[0].continent_dims[0];
+            const dimHeight = this.props.continents[0].continent_dims[1];
+
+            const minBounds = this.unproject([0, 0]);
+            const maxBounds = this.unproject([dimWidth, dimHeight]);
+            const boundMax = L.latLngBounds(minBounds, maxBounds);
+
+            this.state.map.setMaxBounds(boundMax);
+            this.state.map.fitWorld();
+
+        } else {
+            throw new Error('Map reference was not set');
+        }
+    }
+
     private unproject(coord: L.PointExpression): L.LatLng {
-        const map = this.mapAPI;
+        const map = this.state.map;
 
         if (!map) {
             throw new Error('Attempted to unproject onto the map before it was initialized! This is a bug.');
